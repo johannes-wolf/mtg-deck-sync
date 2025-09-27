@@ -11,7 +11,7 @@ format_extension = {
     "xmage": "dck",
 }
 
-def get_deck(cards):
+def get_deck(cfg, cards):
     mainboard = []
     sideboard = []
     maybeboard = []
@@ -19,6 +19,8 @@ def get_deck(cards):
     for card in cards:
         if "sideboard" in card.tags or "commander" in card.tags:
             sideboard.append(card)
+            if "maybeboard" in card.tags:
+                print(f"    warning: Card '{card.name}' is in sideboard and maybeboard! Putting it into sideboard.")
         elif "maybeboard" in card.tags:
             maybeboard.append(card)
         else:
@@ -37,7 +39,7 @@ def get_fixed_extension_number(card):
 
 
 def txt_writer(filename, cards, cfg):
-    mainboard, sideboard, maybeboard = get_deck(cards)
+    mainboard, sideboard, maybeboard = get_deck(cfg, cards)
 
     mainboard_heading = cfg.get("mainboard", "Mainboard")
     sideboard_heading = cfg.get("sideboard", "Sideboard")
@@ -67,7 +69,7 @@ def txt_writer(filename, cards, cfg):
 
 
 def dck_writer(filename, cards, cfg):
-    mainboard, sideboard, maybeboard = get_deck(cards)
+    mainboard, sideboard, maybeboard = get_deck(cfg, cards)
 
     xmage_extension_fix = {
         "4BB": "4ED",
@@ -112,10 +114,9 @@ def sync_deck(name, deck_config):
     if not format in format_writer:
         raise Exception(f"Unknown format: {format}")
 
+    print(f"  - {name} → {file}")
     writer = format_writer[format]
     writer(file, cards, deck_config)
-    print(f"  - {name} → {file}")
-
 
 if __name__ == "__main__":
     try:
