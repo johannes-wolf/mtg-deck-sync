@@ -1,9 +1,11 @@
 import mtg_parser as mtg
 import tomllib as toml
+import httpx
 import sys
 
 deckfile = "decks.toml"
 config = None
+client = mtg.HttpClientFacade(httpx.Client(timeout=10.0))
 
 format_extension = {
     "text": "txt",
@@ -110,7 +112,7 @@ def sync_deck(name, deck_config):
     format = deck_config.get("format") or "text"
     file = deck_config.get("file") or f"{name}.{format_extension[format]}"
 
-    cards = list(mtg.parse_deck(url))
+    cards = list(mtg.parse_deck(url, client))
     if not format in format_writer:
         raise Exception(f"Unknown format: {format}")
 
